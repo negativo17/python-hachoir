@@ -1,0 +1,42 @@
+From 9332e023ba2bcee3383464a3886702917cc43e14 Mon Sep 17 00:00:00 2001
+From: Simone Caronni <negativo17@gmail.com>
+Date: Thu, 10 Sep 2026 14:19:23 +0200
+Subject: [PATCH] Support urwid >= 2.1
+
+urwid 2.1 moved the display modules under urwid.display and 3.0 dropped the
+old top-level urwid.curses_display alias, so hachoir-urwid fails to start with
+ModuleNotFoundError on any recent urwid. Import the curses display from its
+new location, keeping the old one as a fallback.
+---
+ hachoir/urwid.py | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/hachoir/urwid.py b/hachoir/urwid.py
+index 7be693e..3ed3c2c 100644
+--- a/hachoir/urwid.py
++++ b/hachoir/urwid.py
+@@ -14,7 +14,11 @@ from weakref import WeakKeyDictionary
+ from optparse import OptionGroup, OptionParser
+ import os
+ import sys
+-import urwid.curses_display
++try:
++    import urwid.curses_display as curses_display
++except ImportError:
++    # urwid 2.1 moved the display modules under urwid.display
++    from urwid.display import curses as curses_display
+ 
+ try:
+     from urwid import __version__ as urwid_ver
+@@ -585,7 +589,7 @@ def getHelpMessage():
+ def exploreFieldSet(field_set, args, options={}):
+     charset = getTerminalCharset()
+ 
+-    ui = urwid.curses_display.Screen()
++    ui = curses_display.Screen()
+     ui.register_palette((
+         ('focus', 'white', 'dark blue'),
+         ('sep', 'white', 'dark red'),
+-- 
+2.55.0
+
